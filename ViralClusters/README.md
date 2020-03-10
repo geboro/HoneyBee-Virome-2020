@@ -1,5 +1,5 @@
 This folder contains: 
-  * The nucleotide sequences of all viral contigs in folder [nucleotideSeqs](./nucleotideSeqs)
+  * The nucleotide sequences of all viral contigs, with all contigs from the same viral cluster in the same file, under folder [nucleotideSeqs](./nucleotideSeqs)
   * All protein sequences derived from these viral contigs in file [ViralClusterContigs.faa](./ViralClusterContigs.faa)
   
 The header of each protein sequence in the [ViralClusterContigs.faa] file has the following syntax:
