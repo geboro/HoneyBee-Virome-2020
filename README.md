@@ -59,4 +59,19 @@ for i in *sam; do
   samtools idxstats ${i%.sam}_sorted.bam > ${i%_bbsplitted.sam}_IDXSTATS.txt
 done
 ```
+### Clustering 
+We used **vcontact2** ()[] to cluster viral contigs as follows:
+```bash
+vcontact 
+  -f 
+  --raw-proteins virome_FINAL.prt 
+  --rel-mode 'Diamond' 
+  --proteins-fp prot_2_ctg_FINAL.csv 
+  --db 'ProkaryoticViralRefSeq85-Merged' 
+  --pcs-mode MCL 
+  --vcs-mode ClusterONE 
+  --c1-bin /usr/local/bin/cluster_one-1.0.jar 
+  --output-dir vcontact_FINAL 
+  --vc-penalty 1
+```
 
