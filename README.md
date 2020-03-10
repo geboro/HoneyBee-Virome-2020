@@ -75,6 +75,7 @@ vcontact
   --output-dir vcontact_FINAL 
   --vc-penalty 1
 ```
+The similarity network, analysed with **Cytoscape** (v3.7.2), is available as a cytoscape object in [vConTACT_similarity_network.cys](./vConTACT_similarity_network.cys)
 
 ### ViralCluster Analysis
 We calculated the Average Nucleotide and Aminoacid Identity for each ViralCluster with **enveomics** (v.1.1.4) [https://github.com/lmrodriguezr/enveomics], and analysed as described in [ANIanalyses](ANIanalyses).
