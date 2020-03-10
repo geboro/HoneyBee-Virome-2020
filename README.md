@@ -75,5 +75,52 @@ vcontact
   --output-dir vcontact_FINAL 
   --vc-penalty 1
 ```
+
 ### ViralCluster Analysis
-We calculated the Average Nucleotide and Aminoacid Identity for each ViralCluster with **enveomics** (v.1.1.4) [https://github.com/lmrodriguezr/enveomics], and edited
+We calculated the Average Nucleotide and Aminoacid Identity for each ViralCluster with **enveomics** (v.1.1.4) [https://github.com/lmrodriguezr/enveomics], and analysed as described in [ANIanalyses].
+
+### Read Recruitment to ViralClusters
+We used **BBMap** (v37.32) [https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbmap-guide/] to map virome reads against contigs grouped in Viral Contigs...
+```bash
+bbsplit.sh 
+  build=175
+  in=~/Documents/phages/spades/NEW/02_decontaminate/Grammon2017_R1_decont.fastq
+  in2=~/Documents/phages/spades/NEW/02_decontaminate/Grammon2017_R2_decont.fastq
+  ambiguous2=all
+  minid=0.9
+  basename=%_BBsplit.sam 
+  bs=GR_shellscriptfile.OUT 
+  refstats=GR_refstats.OUT 
+  nzo=f
+  threads=40
+
+bbsplit.sh 
+  build=175
+  in=~/Documents/phages/spades/NEW/02_decontaminate/LeDroite2018_R1_decont.fastq
+  in2=~/Documents/phages/spades/NEW/02_decontaminate/LeDroite2018_R2_decont.fastq
+  ambiguous2=all
+  minid=0.9
+  basename=%_BBsplit.sam 
+  bs=LD_shellscriptfile.OUT 
+  refstats=LD_refstats.OUT 
+  nzo=f
+  threads=40
+```
+And then caclulated skewness with [ctgEvenness.py]:
+```bash
+for i in *sam; do
+  samtools view -bh $i | samtools sort > ${i%.sam}_sorted.bam
+  samtools index ${i%.sam}_sorted.bam
+  samtools depth -a ${i%.sam}_sorted.bam > ${i%_bbsplitted.sam}_DEPTH.txt
+  samtools idxstats ${i%.sam}_sorted.bam > ${i%_bbsplitted.sam}_IDXSTATS.txt
+  echo "contig  ctgLen  totReads(CoverageDensity)   coverdBases percGenomeCov   covMedian   obsEve  equitability    covCVar covKurto    covSkew"
+  python ctgEvenness.py $i >> ${i}.ctgStats
+done
+cat *ctgStats > 0Mapping_Summary_GR.tsv
+
+#and then calculate the number of bases within each vcluster:
+cd ~/Documents/phages/spades/NEW/09_vcmaps/infiles
+for i in *fasta; do 
+  echo -n "${i} "
+  grep -v ">" ${i} | wc | awk '{print $3-$1}'
+done
