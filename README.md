@@ -60,7 +60,7 @@ for i in *sam; do
 done
 ```
 ### Clustering 
-We used **vcontact2** ()[] to cluster viral contigs as follows:
+We used **vConTACT** (v2.9.10)[https://bitbucket.org/MAVERICLab/vcontact2/src/master/] to cluster viral contigs as follows:
 ```bash
 vcontact 
   -f 
@@ -74,4 +74,5 @@ vcontact
   --output-dir vcontact_FINAL 
   --vc-penalty 1
 ```
-
+### ViralCluster Analysis
+We calculated the Average Nucleotide and Aminoacid Identity for each ViralCluster with **enveomics** (v.1.1.4) [https://github.com/lmrodriguezr/enveomics], and edited
