@@ -77,10 +77,10 @@ vcontact
 ```
 
 ### ViralCluster Analysis
-We calculated the Average Nucleotide and Aminoacid Identity for each ViralCluster with **enveomics** (v.1.1.4) [https://github.com/lmrodriguezr/enveomics], and analysed as described in [ANIanalyses][https://github.com/geboro/HoneyBee-Virome-2020/blob/master/ANIanalyses].
+We calculated the Average Nucleotide and Aminoacid Identity for each ViralCluster with **enveomics** (v.1.1.4) [https://github.com/lmrodriguezr/enveomics], and analysed as described in [ANIanalyses](ANIanalyses).
 
 ### Read Recruitment to ViralClusters
-We used **BBMap** (v37.32) [https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbmap-guide/] to map virome reads against contigs grouped in Viral Contigs...
+We used **BBMap** (v37.32) [https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbmap-guide/] to map virome reads against contigs grouped in Viral Clusters...
 ```bash
 bbsplit.sh 
   build=175
@@ -106,7 +106,7 @@ bbsplit.sh
   nzo=f
   threads=40
 ```
-And then caclulated skewness with [ctgEvenness.py][https://github.com/geboro/HoneyBee-Virome-2020/blob/master/ctgEvenness.py]:
+And then caclulated skewness with [ctgEvenness.py](https://github.com/geboro/HoneyBee-Virome-2020/blob/master/ctgEvenness.py):
 ```bash
 for i in *sam; do
   samtools view -bh $i | samtools sort > ${i%.sam}_sorted.bam
@@ -124,3 +124,30 @@ for i in *fasta; do
   echo -n "${i} "
   grep -v ">" ${i} | wc | awk '{print $3-$1}'
 done
+```
+
+### Mapping reads from Bacterial Metagenomes
+We used **BBMap** (v37.32) [https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbmap-guide/] to map reads from 73 bacterial metagenomes against contigs grouped in Viral Clusters...
+
+```bash
+for i in ~/KEmetagenomes/*R1.fastq.gz; do
+  long=${i%_unmapped_R[12].fastq.gz}; 
+  name=${long#*KEmetagenomes/};
+  mkdir ./mapping_files/${name};
+  bbsplit.sh 
+    build=175 
+    in=${i} 
+    in2=${i%1.fastq.gz}2.fastq.gz 
+    ambiguous2=all 
+    basename=%_${name}_BBsplit.sam 
+    refstats=${name}_refstats.OUT 
+    nzo=f 
+    threads=40;  
+  cat *OUT | awk '{sum+=$6} END { print "AVG_unamb_READS = ",sum/NR}' > ./mapping_files/0_${name}_stats
+  cat *OUT | awk '{sum+=$7} END { print "AVG_amb_READS = ",sum/NR}' >> ./mapping_files/0_${name}_stats
+  cat *OUT | awk '{sum+=$7} END { print "TOT_amb_READS = ",sum}' >> ./mapping_files/0_${name}_stats
+  cat *OUT | awk '{sum+=$6} END { print "TOT_unamb_READS = ",sum}' >> ./mapping_files/0_${name}_stats
+  mv *sam ./mapping_files/${name};
+  mv *OUT ./mapping_files/${name};
+done
+```
