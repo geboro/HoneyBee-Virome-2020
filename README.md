@@ -1,5 +1,5 @@
 # HoneyBee-Virome-2020
-Pipeline for the analysis of Bonilla-Rosso et al. 2020. "Honey bees harbor a diverse gut virome engagin in nested strain-level interactions with the microbiota" PNAS. [doi:xxxx]
+Pipeline for the analysis of Bonilla-Rosso et al. 2020. "Honey bees harbor a diverse gut virome engaging in nested strain-level interactions with the microbiota" PNAS. [doi:xxxx]
 
 ### Assembly
 The metaviromes were assembled with **SPAdes** (v3.13.0) [http://cab.spbu.ru/software/spades/] as follows:
