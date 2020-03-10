@@ -1,0 +1,62 @@
+```bash
+# Generate the cluster files
+perl vcontact_clusters.pl cluster2contigs2.csv virome_FINAL.fasta outfile.fasta
+
+for i in *txt; do 
+  mkdir ${i%.txt}; 
+  cp $i ./${i%.txt}/; 
+  shopt -s nullglob
+  cd ${i%.txt}; 
+  cat ${i} | awk '/^>/ {if(N>0) printf("\n"); printf("%s\n",$0);++N;next;} { printf("%s",$0);} END {printf("\n");}' |split -l 2 - seq_
+  grep '>' seq* | awk -F'        ' '{print $1}' | sed 's/ /_/g' | awk -F':>' '{print "mv " $1 " " $2 ".fasta"}' >> renamer.sh
+  chmod aoug+x renamer.sh
+  ./renamer.sh
+  cd .. 
+done
+
+# Run ANI
+for i in *txt; do 
+  cd ${i%.txt}; 
+  ~/enveomics/Examples/ani-matrix.bash ANIvalues.out ~/08_clusters/${i%.txt}/*.fasta > ani-matrix.log; 
+  cd ..
+done 
+
+# Calculate AVg and STDEV
+for i in *.txt; do 
+  echo -n ${i%.txt} ""; 
+  awk '{print $3}' ./${i%.txt}/ANIvalues.out | awk '{for(i=1;i<=NF;i++) {sum[i] += $i; sumsq[i] += ($i)^2} } END {for (i=1;i<=NF;i++) { printf "%f %f \n", sum[i]/NR, sqrt((sumsq[i]-sum[i]^2/NR)/NR)} }'; 
+done
+
+# Then get all values together to model the distances...
+
+for i in ./*/ANIvalues.out; do 
+  awk -v var="${i%ANIvalues.out}" '{print var "\t" $1 "\t" $2 "\t" $3 "\t" $4 "\t" $5 "\t" $6 "\t" $7}' ${i} | sed 's#\./##g' | sed 's#/##g' | grep -v 'SeqA' >> ANIvaluesALL.tsv 
+done
+
+# Annotate with Prokka and run AAI
+for i in VC_*.txt; do 
+  cd ${i%.txt}; 
+  for j in *fasta; do 
+    prokka --outdir ${j%.fasta}_prokkaVir --kingdom Viruses --prefix ${j%.fasta} --genus ${i%.txt} --species $j --force $j --cpus 20;  done;
+  cd ~/Documents/phages/spades/NEW/08_clusters;
+  cp ./*prokka/*faa ./; 
+  aai-matrix.bash AAIvalues.out ~Documents/phages/spades/NEW/08_clusters/${i%.txt}/*.faa > aai-matrix.log
+  cd ..; 
+done
+
+for f in ./VC*/*prokkaVir/*tsv; do x=${f#.}; y=${x%.tsv}; cat ${f} | sed "s#^#$y\t#g" | grep -v 'locus_tag' | awk '{print $0 "\t" $1}' | sort >> all_prokkaVir.tsv; done
+for f in ./VC*/*prokkaBac/*tsv; do x=${f#.}; y=${x%.tsv}; cat ${f} | sed "s#^#$y\t#g" | grep -v 'locus_tag' | awk '{print $0 "\t" $1}' | sort >> all_prokkaBac.tsv; done
+
+
+
+
+for i in ./*/AAIvalues.out; do 
+  awk -v var="${i%AAIvalues.out}" '{print var "\t" $1 "\t" $2 "\t" $3 "\t" $4 "\t" $5 "\t" $6 "\t" $7}' ${i} | sed 's#\./##g' | sed 's#/##g' | grep -v 'SeqA' >> AAIvaluesALL.tsv 
+done
+
+
+# Then parse values with ANIparser
+for i in *txt; do cd ${i%.txt}
+  ANIparser.py ~/Documents/phages/spades/NEW/08_clusters/${i%.txt}/ANIvalues.out ~/Documents/phages/spades/NEW/08_clusters/${i%.txt}/AAIvalues.out >> ../FINALclusterSTATS.tsv
+  cd ..
+done
