@@ -2,7 +2,7 @@
 Pipeline for the analysis of Bonilla-Rosso et al. 2020. "Honey bees harbor a diverse gut virome engagin in nested strain-level interactions with the microbiota" PNAS. [doi:xxxx]
 
 ### Assembly
-The metaviromes were assembled with **SPAdes** (v3.13.0 downloaded October 2018) [http://cab.spbu.ru/software/spades/] as follows:
+The metaviromes were assembled with **SPAdes** (v3.13.0) [http://cab.spbu.ru/software/spades/] as follows:
 ```bash
 spades.py 
   -o ./virome 
@@ -14,7 +14,7 @@ spades.py
   -t 40
   --phred-offset 33
 ```
-And evaluated with **QUAST** (v5.0.1 downloaded October 2018) [https://github.com/ablab/quast] as follows:
+And evaluated with **QUAST** (v5.0.1) [https://github.com/ablab/quast] as follows:
 ```bash
 quast.py 
   -o ./metaquast01 
@@ -22,29 +22,41 @@ quast.py
   --contig-thresholds 1000,2000,2500,3000,5000,7500,10000,15000,20000,25000,30000,35000,40000,45000,50000,55000,60000,70000,80000,90000,100000 
   -t 25 
   --unique-mapping 
-  Grammont01/contigs.fasta  
-  LeDroites01/contigs.fasta 
+  Virome/contigs.fasta  
 ```
 ### Detection of Viral Contigs
-We used **VirSorter** (v1.0.5 downloaded in March 2019) [https://github.com/simroux/VirSorter] as follows:
+We used **VirSorter** (v1.0.5) [https://github.com/simroux/VirSorter] as follows:
 ```bash
 wrapper_phage_contigs_sorter_iPlant.pl 
-  -f Grammont_assembly.fasta 
+  -f Virome_assembly.fasta 
   -db 1 
-  --wdir /home/gbonilla/Documents/phages/spades/NEW/04_virsorter/Grammont_virsorter
+  --wdir /home/gbonilla/Documents/phages/spades/NEW/04_virsorter/Virome_virsorter
   --virome 
   --ncpu 30 
   --data-dir ./virsorter-data
 ```
 
-### Detection of Viral Contigs
-We used **VirSorter** (v1.0.5 downloaded in March 2019) [https://github.com/simroux/VirSorter] as follows:
+### Read Mapping
+We used **BBMap** (v37.32) [https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbmap-guide/] to map virome reads to assembled contigs as follows:
 ```bash
-wrapper_phage_contigs_sorter_iPlant.pl 
-  -f Grammont_assembly.fasta 
-  -db 1 
-  --wdir /home/gbonilla/Documents/phages/spades/NEW/04_virsorter/Grammont_virsorter
-  --virome 
-  --ncpu 30 
-  --data-dir ./virsorter-data
+~/bbmap/bbsplit.sh 
+  build=1 ref=./virome/infile
+~/bbmap/bbsplit.sh 
+  build=1
+  in=Virome_R1.fastq
+  in2=Virome_R2.fastq
+  ambiguous2=best 
+  basename=%_BBsplit.sam 
+  refstats=VR_refstats.OUT 
+  nzo=f
 ```
+And **samtools** (v1.9 using htslib 1.9) [https://github.com/samtools/samtools] to generate coverage depth profiles
+```bash
+for i in *sam; do
+  samtools view -bh $i | samtools sort > ${i%.sam}_sorted.bam
+  samtools index ${i%.sam}_sorted.bam
+  samtools depth -a ${i%.sam}_sorted.bam > ${i%_bbsplitted.sam}_DEPTH.txt
+  samtools idxstats ${i%.sam}_sorted.bam > ${i%_bbsplitted.sam}_IDXSTATS.txt
+done
+```
+
