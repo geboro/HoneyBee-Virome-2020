@@ -1,6 +1,11 @@
 # HoneyBee-Virome-2020
 Pipeline for the analysis of Bonilla-Rosso et al. 2020. "Honey bees harbor a diverse gut virome engaging in nested strain-level interactions with the microbiota" PNAS. [doi:xxxx]
 
+## Data Deposition
+Sequencing data produced during this project is deposited at DDBJ/ENA/GenBank under BioProject [PRJNA599270](https://www.ncbi.nlm.nih.gov/bioproject/?term=PRJNA599270). Raw reads are deposited in the SRA under accesions [SRX7509864](https://www.ncbi.nlm.nih.gov/sra/SRX7509864[accn]) for Grammont, and [SRX7509865](https://www.ncbi.nlm.nih.gov/sra/SRX7509865[accn]) for LesDroites. The assembled viral contigs are deposited as a Whole Genome shotgun project under accession JAAOBB000000000. The genomes of the pure phage isolates are deposited 
+in GenBank under accesion numbers [MT006233-MT006240](https://www.ncbi.nlm.nih.gov/nuccore?term=MT006233%5Baccn%5D%3AMT006240%5Baccn%5D&cmd=DetailsSearch). 
+
+
 ### Assembly
 The metaviromes were assembled with **SPAdes** (v3.13.0) [http://cab.spbu.ru/software/spades/] as follows:
 ```bash
